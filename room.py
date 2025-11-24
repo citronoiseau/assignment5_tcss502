@@ -10,7 +10,7 @@ class RoomConstructor(ABC):
         self._type = type
         self._x = x
         self._y = y
-        self.doors = {"N": False, "S": False, "E": False, "W": False}
+        self._neighbors = {"N": None, "S": None, "E": None, "W": None}
 
     def get_type(self):
         return self._type
@@ -39,18 +39,25 @@ class RoomConstructor(ABC):
         else:
             return " "
 
-    def get_doors(self):
-        return self.doors
+    def has_door(self, direction):
+        return self._neighbors[direction] is not None
+
+    def get_neighbors(self):
+        return self._neighbors
+
+    def set_neighbor(self, direction, room):
+        if direction in self._neighbors:
+            self._neighbors[direction] = room
 
     def __str__(self):
-        top = "*" + ("-" if self.doors["N"] else "*") + "*"
+        top = "*" + ("-" if self.has_door("N") else "*") + "*"
 
         # middle (left door, content, right door)
-        left = "|" if self.doors["W"] else "*"
-        right = "|" if self.doors["E"] else "*"
+        left = "|" if self.has_door("W") else "*"
+        right = "|" if self.has_door("E") else "*"
         middle = f"{left}{self.get_display_char()}{right}"
 
-        bottom = "*" + ("-" if self.doors["S"] else "*") + "*"
+        bottom = "*" + ("-" if self.has_door("S") else "*") + "*"
 
         return f"{top}\n{middle}\n{bottom}"
 

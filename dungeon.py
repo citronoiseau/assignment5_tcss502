@@ -9,59 +9,59 @@ class Dungeon:
         self._rooms = {}  # dictionary to store rooms and coordinates as keys and values
 
     def generate(self):
-
-        # for future randomize entrance and exit
-        start_x, start_y = 0, 0  # prob can randomize later
-        self._rooms[(start_x, start_y)] = RoomFactory.create_entrance(start_x, start_y)
-
-        end_x, end_y = self._size - 1, self._size - 1  # prob can randomize later
-        self._rooms[(end_x, end_y)] = RoomFactory.create_exit(end_x, end_y)
-
-        self.generate_path_with_dfs(
-            start_x, start_y
-        )  # after that our self._maze has 0 values -> where our rooms will go
-        self.place_rooms()
+        self.generate_path_with_dfs()  # after that our self._maze has 0 values -> where our rooms will go
         self.assign_pillars()
         self.assign_items()
 
-    def generate_path_with_dfs(self, x, y, visited=None):
-        if visited == None:
-            visited = set()  # using set so no same values
+    def generate_path_with_dfs(self, x=0, y=0, visited=None, parent_room=None):
+        if visited is None:
+            visited = set()
         visited.add((x, y))
-        self._maze[y][x] = 0  # mark as 0 for room generation in future
 
-        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]  # up, right, down, left
+        # create room
+        room = self.create_room(x, y)
+        # assign doors
+        if parent_room:
+            self.assign_doors(room, x, y, parent_room)
+
+        # DFS
+        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
         random.shuffle(directions)
         for direction_x, direction_y in directions:
             next_x, next_y = x + direction_x, y + direction_y
             if 0 <= next_x < self._size and 0 <= next_y < self._size:
                 if (next_x, next_y) not in visited:
-                    self.generate_path_with_dfs(next_x, next_y, visited)
+                    self.generate_path_with_dfs(next_x, next_y, visited, room)
 
-    def place_rooms(self):
-        for y in range(self._size):
-            for x in range(self._size):
-                if self._maze[y][x] == 0:
-                    if (
-                        x,
-                        y,
-                    ) not in self._rooms:  # already created Entrance and Exit, so need to skip it
-                        room = RoomFactory.create_room(x, y)
-                        self._rooms[(x, y)] = room
-                    self.assign_doors(self._rooms[(x, y)], x, y)
+    def create_room(self, x, y):
+        if (x, y) not in self._rooms:
+            if (x, y) == (0, 0):
+                room = RoomFactory.create_entrance(x, y)
+            elif (x, y) == (self._size - 1, self._size - 1):
+                room = RoomFactory.create_exit(x, y)
+            else:
+                room = RoomFactory.create_room(x, y)
+            self._rooms[(x, y)] = room
+        else:
+            room = self._rooms[(x, y)]
 
-    def assign_doors(self, room, x, y):
-        if y > 0 and self._maze[y - 1][x] == 0:
-            room.doors["N"] = True
+        return room
 
-        if y < self._size - 1 and self._maze[y + 1][x] == 0:
-            room.doors["S"] = True
+    def assign_doors(self, room, x, y, parent_room):
+        dx = x - parent_room._x
+        dy = y - parent_room._y
 
-        if x > 0 and self._maze[y][x - 1] == 0:
-            room.doors["W"] = True
-
-        if x < self._size - 1 and self._maze[y][x + 1] == 0:
-            room.doors["E"] = True
+        if dx == 1:
+            room.set_neighbor("W", parent_room)
+            parent_room.set_neighbor("E", room)
+        elif dx == -1:
+            room.set_neighbor("E", parent_room)
+            parent_room.set_neighbor("W", room)
+        elif dy == 1:
+            room.set_neighbor("N", parent_room)
+            parent_room.set_neighbor("S", room)
+        elif dy == -1:
+            room.set_neighbor("S", parent_room)
 
     def assign_pillars(self):
         pillars = ["abstraction", "encapsulation", "inheritance", "polymorphism"]
