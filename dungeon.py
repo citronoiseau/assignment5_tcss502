@@ -2,6 +2,8 @@ import random
 from room import RoomFactory
 
 
+# things to implement: position of Adventurer
+# think how adventurer will move around the maze
 class Dungeon:
     def __init__(self, size):
         self._size = size
@@ -12,6 +14,34 @@ class Dungeon:
         self.generate_path_with_dfs()  # after that our self._maze has 0 values -> where our rooms will go
         self.assign_pillars()
         self.assign_items()
+
+    def __str__(self):
+        output_lines = []
+
+        for y in range(self._size):  # each row of rooms
+            row_top = []
+            row_mid = []
+            row_bot = []
+
+            for x in range(self._size):  # each room in the row
+                room = self._rooms[(x, y)]
+                top, mid, bot = str(room).split(
+                    "\n"
+                )  # have to split because assigning for the entire maze
+
+                row_top.append(top)
+                row_mid.append(mid)
+                row_bot.append(bot)
+
+            # join all rows horizontally
+            output_lines.append(" ".join(row_top))
+            output_lines.append(" ".join(row_mid))
+            output_lines.append(" ".join(row_bot))
+
+            # gap between rooms
+            output_lines.append("")
+
+        return "\n".join(output_lines)
 
     def generate_path_with_dfs(self, x=0, y=0, visited=None, parent_room=None):
         if visited is None:
@@ -35,6 +65,7 @@ class Dungeon:
 
     def create_room(self, x, y):
         if (x, y) not in self._rooms:
+            # randomize later
             if (x, y) == (0, 0):
                 room = RoomFactory.create_entrance(x, y)
             elif (x, y) == (self._size - 1, self._size - 1):
@@ -48,20 +79,21 @@ class Dungeon:
         return room
 
     def assign_doors(self, room, x, y, parent_room):
-        dx = x - parent_room._x
-        dy = y - parent_room._y
+        direction_x = x - parent_room._x
+        direction_y = y - parent_room._y
 
-        if dx == 1:
+        if direction_x == 1:
             room.set_neighbor("W", parent_room)
             parent_room.set_neighbor("E", room)
-        elif dx == -1:
+        elif direction_x == -1:
             room.set_neighbor("E", parent_room)
             parent_room.set_neighbor("W", room)
-        elif dy == 1:
+        elif direction_y == 1:
             room.set_neighbor("N", parent_room)
             parent_room.set_neighbor("S", room)
-        elif dy == -1:
+        elif direction_y == -1:
             room.set_neighbor("S", parent_room)
+            parent_room.set_neighbor("N", room)
 
     def assign_pillars(self):
         pillars = ["abstraction", "encapsulation", "inheritance", "polymorphism"]
