@@ -85,6 +85,19 @@ class Room(RoomConstructor):
     def get_items(self):
         return self._items
 
+    def pick_items(self):
+        items_to_pick = self._items.copy()
+        self._items.clear()
+        return items_to_pick
+
+    def pick_pillar(self):
+        if self._pillar is None:
+            return None
+
+        pillar = self._pillar
+        self._pillar = None
+        return pillar
+
 
 class RoomFactory:
     @staticmethod
