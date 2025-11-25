@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import math
 
 items = ["healing_potion", "vision_potion", "pit", "empty"]
 
@@ -11,6 +10,18 @@ class RoomConstructor(ABC):
         self._x = x
         self._y = y
         self._neighbors = {"N": None, "S": None, "E": None, "W": None}
+
+    def __str__(self):
+        top = "*" + ("-" if self.has_door("N") else "*") + "*"
+
+        # middle (left door, content, right door)
+        left = "|" if self.has_door("W") else "*"
+        right = "|" if self.has_door("E") else "*"
+        middle = f"{left}{self.get_display_char()}{right}"
+
+        bottom = "*" + ("-" if self.has_door("S") else "*") + "*"
+
+        return f"{top}\n{middle}\n{bottom}"
 
     def get_type(self):
         return self._type
@@ -30,12 +41,8 @@ class RoomConstructor(ABC):
             return pillar_namings.get(self._pillar)
         elif len(self._items) > 1:
             return "M"
-        elif "pit" in self._items:
-            return "X"
-        elif "healing_potion" in self._items:
-            return "H"
-        elif "vision_potion" in self._items:
-            return "V"
+        elif self._items:
+            return self._items[0].display_char()
         else:
             return " "
 
@@ -48,18 +55,6 @@ class RoomConstructor(ABC):
     def set_neighbor(self, direction, room):
         if direction in self._neighbors:
             self._neighbors[direction] = room
-
-    def __str__(self):
-        top = "*" + ("-" if self.has_door("N") else "*") + "*"
-
-        # middle (left door, content, right door)
-        left = "|" if self.has_door("W") else "*"
-        right = "|" if self.has_door("E") else "*"
-        middle = f"{left}{self.get_display_char()}{right}"
-
-        bottom = "*" + ("-" if self.has_door("S") else "*") + "*"
-
-        return f"{top}\n{middle}\n{bottom}"
 
 
 class Entrance(RoomConstructor):

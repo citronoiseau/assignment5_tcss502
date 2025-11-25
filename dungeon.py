@@ -1,5 +1,6 @@
 import random
 from room import RoomFactory
+from item import ItemFactory
 
 
 # things to implement: position of Adventurer
@@ -109,11 +110,16 @@ class Dungeon:
             room.assign_pillar(pillar_name)
 
     def assign_items(self):
-        items = ["healing_potion", "vision_potion", "pit"]
-        chance = 0.1  # can modify this constant
+        chance = 0.1  # probability for each item
 
         for room in self._rooms.values():
             if room.get_type() == "Room" and room.get_pillar() is None:
-                for item in items:
-                    if random.random() < chance:
-                        room.add_item(item)
+                # Healing Potion
+                if random.random() < chance:
+                    room.add_item(ItemFactory.create_healing_potion())
+                # Vision Potion
+                if random.random() < chance:
+                    room.add_item(ItemFactory.create_vision_potion())
+                # Pit
+                if random.random() < chance:
+                    room.add_item(ItemFactory.create_pit())
