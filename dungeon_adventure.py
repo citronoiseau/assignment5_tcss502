@@ -5,57 +5,82 @@ from adventurer import Adventurer
 class DungeonAdventure:
     def __init__(self):
         name = input("Enter your name: ")
-        size = input("Enter the Dungeon size: ")
-        position = (0, 0)
+        size = 0
+        while size < 3:
+            size = int(input("Enter the Dungeon size (Cannot be less than 3x3): "))
 
         self._dungeon = Dungeon(size)
         self._dungeon.generate()
-        self._adventurer = Adventurer(name, position)
+        self._adventurer = Adventurer(name)
+        self._dungeon.set_adventurer(self._adventurer)
 
     def print_actions(self):
         print("Possible actions:")
         print("M - Move")
         print("H - Use a healing potion")
-        print("H - Use a vision potion")
+        print("V - Use a vision potion")
+        print("CHEAT - Show the entire dungeon")
 
     def handle_movement(self):
         print("Possible movement:")
-        directions = self._room.get_neighbors()
-        print(directions)
-        adventurer_direction = input("Direction: ")
+        neighbors = self._dungeon.get_current_room().get_neighbors()
+        valid_directions = [d for d, r in neighbors.items() if r is not None]
+        print(valid_directions)
         # also do a loop to ensure correct direction
-        if adventurer_direction in directions:
-            self._dungeon.move_adventurer(adventurer_direction)
-        else:
-            print("invalid")
+        while True:
+            adventurer_direction = input("Direction: ").upper()
+
+            if adventurer_direction in valid_directions:
+                self._dungeon.move_adventurer(adventurer_direction)
+                break
+            else:
+                print("Please enter a valid direction")
 
     def start_game(self):
         print("Game started")
         print("Tour goal is to find all 4 pillars of OOP and Exit to win the game")
 
         # process the room
-        self._dungeon._process_room()  # collect potions/pillars etc
+        self._dungeon.process_room()  # collect potions/pillars etc
 
-        while self._adventurer.is_alive() and self._adventurer.get_pillars().length < 4:
-            # print the room
+        while self._adventurer.is_alive():
             print(self._adventurer)
-            print(self._dungeon.adventurer_room())
-
             # print the possible actions
             self.print_actions()
+            current_room = self._dungeon.get_current_room()
+            if (
+                current_room.get_type() == "Exit"
+                and len(self._adventurer.get_pillars()) == 4
+            ):
+                print("You reached the Exit with all 4 pillars! You won!")
+                break
             # do an infinite loop until a good action is choosen
-            choice = input("Choose an action: ")
+            choice = input("\nChoose an action: ")
             if choice == "M":
                 self.handle_movement()
             elif choice == "H":
                 self._adventurer.use_healing_potion()
 
             elif choice == "V":
-                self._adventurer.use_vision_potion(neighbors)
+                self._adventurer.use_vision_potion(
+                    self._dungeon.get_current_room().get_neighbors()
+                )
+            elif choice == "CHEAT":
+                print(self._dungeon)
             else:
                 print("Invalid Option")
 
         if not self._adventurer.is_alive():
-            print("you lost")
-        print("Final map")
+            print("You lost! :(")
+
+        print("\nFinal map:")
         print(self._dungeon)
+
+
+def main():
+    game = DungeonAdventure()
+    game.start_game()
+
+
+if __name__ == "__main__":
+    main()
