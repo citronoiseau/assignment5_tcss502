@@ -31,7 +31,7 @@ class RoomConstructor(ABC):
             return "i"
         elif self.get_type() == "Exit":
             return "O"
-        elif self._pillar is not None:
+        elif self.get_type() == "Room" and self.get_pillar():
             pillar_namings = {
                 "abstraction": "A",
                 "encapsulation": "E",
@@ -39,10 +39,12 @@ class RoomConstructor(ABC):
                 "polymorphism": "P",
             }
             return pillar_namings.get(self._pillar)
-        elif len(self._items) > 1:
+        elif len(self.get_items()) > 1:
             return "M"
-        elif self._items:
+        elif len(self.get_items()) == 1:
             return self._items[0].display_char()
+        elif self.get_pit():
+            return self._pit.display_char()
         else:
             return " "
 
@@ -71,6 +73,7 @@ class Room(RoomConstructor):
     def __init__(self, x, y):
         super().__init__("Room", x, y)
         self._items = []
+        self._pit = None
         self._pillar = None
 
     def assign_pillar(self, pillar):
@@ -82,8 +85,14 @@ class Room(RoomConstructor):
     def add_item(self, item):
         self._items.append(item)
 
+    def add_pit(self, pit):
+        self._pit = pit
+
     def get_items(self):
         return self._items
+
+    def get_pit(self):
+        return self._pit
 
     def pick_items(self):
         items_to_pick = self._items.copy()
