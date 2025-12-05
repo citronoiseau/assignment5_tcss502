@@ -3,7 +3,11 @@ from adventurer import Adventurer
 
 
 class DungeonAdventure:
+    """ A class to represent an the logic for playing the game
+    """
     def __init__(self):
+        """ A constructor for the game
+        """
         name = input("Enter your name: ")
         size = 0
         while size < 3:
@@ -15,6 +19,8 @@ class DungeonAdventure:
         self._dungeon.set_adventurer(self._adventurer)
 
     def print_actions(self):
+        """ Actions the user can use to interact with the game
+        """
         print("Possible actions:")
         print("M - Move")
         print("H - Use a healing potion")
@@ -22,6 +28,8 @@ class DungeonAdventure:
         print("CHEAT - Show the entire dungeon")
 
     def handle_movement(self):
+        """ Tells which direction the adventurer is going
+        """
         print("Possible movement:")
         neighbors = self._dungeon.get_current_room().get_neighbors()
         valid_directions = [d for d, r in neighbors.items() if r is not None]
@@ -37,6 +45,8 @@ class DungeonAdventure:
                 print("Please enter a valid direction")
 
     def start_game(self):
+        """ Starts the game
+        """
         print("Game started")
         print("Tour goal is to find all 4 pillars of OOP and Exit to win the game")
 
@@ -78,6 +88,8 @@ class DungeonAdventure:
 
 
 def main():
+    """ Runs the game
+    """
     game = DungeonAdventure()
     game.start_game()
 
