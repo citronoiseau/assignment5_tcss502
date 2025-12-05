@@ -14,6 +14,7 @@ class Adventurer:
         Args:
             name (str): Name of the adventurer
         """
+        
         self.name = name
         self.hit_points = random.randint(START_RANGE, END_RANGE)
         self.healing_potions = 0
