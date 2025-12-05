@@ -3,10 +3,19 @@ from room import RoomFactory
 from item import ItemFactory
 
 
-# things to implement: position of Adventurer
-# think how adventurer will move around the maze
 class Dungeon:
+    """
+    Represents the dungeon that contains rooms, items, pillars,
+    the adventurer, and all dungeon-generation and movement logic.
+    """
+
     def __init__(self, size):
+        """
+        Initializes the dungeon with a given size
+
+        Args:
+            size (int): Size of the dungeon grid (size x size)
+        """
         self._size = size
         self._maze = [[1 for x in range(self._size)] for y in range(self._size)]
         self._rooms = {}  # dictionary to store rooms and coordinates as keys and values
@@ -15,20 +24,27 @@ class Dungeon:
         self._adventurer = None
         self._current_room = None
 
-    # dungeon generator
-
     def generate(self):
+        """
+        Generates the dungeon layout, including entrance, exit,
+        rooms, pillars, and items
+        """
         self._entrance_coords = self.random_edge_coords_generator()
         self._exit_coords = self.random_edge_coords_generator()
         # loop to ensure that entrance coords != exit coords
         while self._exit_coords == self._entrance_coords:
             self._exit_coords = self.random_edge_coords_generator()
-        self.generate_path_with_dfs()  # after that our self._maze has 0 values -> where our rooms will go
+        self.generate_path_with_dfs() 
         self.assign_pillars()
         self.assign_items()
 
-    # used to generate random edge position for entrance and exit
     def random_edge_coords_generator(self):
+        """
+        Generates random coordinates along the edge of the dungeon for future entrance/exit creation
+
+        Returns:
+            tuple: (x, y) coordinates on a random dungeon edge
+        """
         side = random.choice(["north", "south", "west", "east"])
 
         if side == "north":
@@ -44,6 +60,15 @@ class Dungeon:
             return (self._size - 1, random.randint(0, self._size - 1))
 
     def generate_path_with_dfs(self, x=0, y=0, visited=None, parent_room=None):
+        """
+        Recursively generates the dungeon using Depth-First Search
+
+        Args:
+            x (int): Current x-coordinate
+            y (int): Current y-coordinate
+            visited (set): Set of visited coordinates
+            parent_room (RoomConstructor): Parent room for door linking
+        """
         if visited is None:
             visited = set()
         visited.add((x, y))
@@ -64,8 +89,18 @@ class Dungeon:
                     self.generate_path_with_dfs(next_x, next_y, visited, room)
 
     def create_room(self, x, y):
+        """
+        Creates a room at the given coordinates
+        Creates an entrance/exit at the randomized coordinates
+
+        Args:
+            x (int): X-coordinate.
+            y (int): Y-coordinate.
+
+        Returns:
+            RoomConstructor: Created room
+        """
         if (x, y) not in self._rooms:
-            # randomize later
             if (x, y) == self._entrance_coords:
                 room = RoomFactory.create_entrance(x, y)
             elif (x, y) == self._exit_coords:
@@ -79,6 +114,15 @@ class Dungeon:
         return room
 
     def assign_doors(self, room, x, y, parent_room):
+        """
+        Assigns doors between two adjacent rooms
+
+        Args:
+            room (RoomConstructor): Current room
+            x (int): X-coordinate of the current room
+            y (int): Y-coordinate of the current room
+            parent_room (RoomConstructor): Previously visited room
+        """
         direction_x = x - parent_room._x
         direction_y = y - parent_room._y
 
@@ -96,6 +140,9 @@ class Dungeon:
             parent_room.set_neighbor("N", room)
 
     def assign_pillars(self):
+        """
+        Randomly assigns four pillars to random non-entrance, non-exit rooms
+        """
         pillars = ["abstraction", "encapsulation", "inheritance", "polymorphism"]
         # get rooms that are not exit or entrance
         available_rooms = [
@@ -109,6 +156,9 @@ class Dungeon:
             room.assign_pillar(pillar_name)
 
     def assign_items(self):
+        """
+        Randomly assigns items and pits to rooms that do not contain pillars
+        """
         chance = 0.3  # probability for each item
 
         for room in self._rooms.values():
@@ -125,13 +175,31 @@ class Dungeon:
 
     # game processing
     def set_adventurer(self, adventurer):
+        """
+        Places the adventurer in the entrance room
+
+        Args:
+            adventurer (Adventurer): The player character
+        """
         self._adventurer = adventurer
         self._current_room = self._rooms[self._entrance_coords]
 
     def get_current_room(self):
+        """
+        Returns the room the adventurer is currently in
+
+        Returns:
+            RoomConstructor: The current room
+        """
         return self._current_room
 
     def move_adventurer(self, direction):
+        """
+        Moves the adventurer in the given direction if a door exists
+
+        Args:
+            direction (str): 'N' or 'S' or 'E' or 'W'.
+        """
         if self._current_room.has_door(direction):
             next_room = self._current_room.get_neighbors()[direction]
             if next_room:
@@ -143,14 +211,16 @@ class Dungeon:
             print("No door in that direction!")
 
     def process_room(self):
+        """
+        Handles adventurer entering the room.
+        """
         room = self._current_room
 
         print("\nYou entered a new room!")
         print(room)
         # pick up items in normal rooms (not entrance or exit)
         if room.get_type() == "Room":
-            items = room.pick_items()  # safely clears the room
-
+            items = room.pick_items()  # clears the room
             for item in items:
                 item_type = item.get_type()
 
@@ -176,6 +246,12 @@ class Dungeon:
 
     # show the entire dungeon
     def __str__(self):
+        """
+        Returns a string representation of the entire dungeon map
+
+        Returns:
+            str:Vvisualization of the dungeon.
+        """
         output_lines = []
 
         for y in range(self._size):  # each row of rooms
