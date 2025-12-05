@@ -8,7 +8,7 @@ class Adventurer:
     """ A class to represent an adventurer
     """
 
-    def init(self, name):
+    def __init__(self, name):
         """Constructs the attributes needed for the adventurer
 
         Args:

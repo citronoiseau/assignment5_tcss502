@@ -65,7 +65,7 @@ class DungeonAdventure:
                 print("You reached the Exit with all 4 pillars! You won!")
                 break
             # do an infinite loop until a good action is choosen
-            choice = input("\nChoose an action: ")
+            choice = input("\nChoose an action: ").strip().upper()
             if choice == "M":
                 self.handle_movement()
             elif choice == "H":
