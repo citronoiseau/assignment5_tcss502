@@ -27,7 +27,12 @@ class Adventurer:
         Returns:
             str: Name of the adventurer, hit points, total healing potions, total vision potions, list of pillars found
         """
-        return f"Name: {self.name}\n Hit points: {self.hit_points}\n Total healing potions: {self.healing_potions}\n Total Vision Potions: {self.vision_potions}\n List of Pillars found: {self.pillars_found}\n"
+        # nicer pillars formatting
+        if self.pillars_found:
+            pillars = ", ".join(self.pillars_found)
+        else:
+            pillars = "None"
+        return f"Name: {self.name}\n Hit points: {self.hit_points}\n Total healing potions: {self.healing_potions}\n Total Vision Potions: {self.vision_potions}\n List of Pillars found: {pillars}\n"
 
     def take_damage(self, damage):
         """ Inflicts damage on the adventurer
@@ -61,15 +66,13 @@ class Adventurer:
 
         Args:
             amount (int): The amount to heal the adventurer
-
-        Returns:
-            int: How many healing potions the adventurer has
         """
-        self.hit_points += amount
-        if self.hit_points > 100:
-            self.hit_points == 100
-            return "Adventurer has reached max HP. Health: 100"
-        return self.healing_potions
+        if self.hit_points >= 100:
+            return 0   # no healing possible
+
+        before_heal = self.hit_points
+        self.hit_points = min(100, self.hit_points + amount)
+        return self.hit_points - before_heal
     
     def add_healing_potion(self):
         """ Adds a healing potion to the adventurer's inventory
@@ -84,13 +87,19 @@ class Adventurer:
     def use_healing_potion(self):
         """ Uses the adventurer's healing potion
         """
-        if self.healing_potions > 0:
-            heal_amount = random.randint(15, 25)
-            self.heal(heal_amount)
-            self.healing_potions -= 1
-            print(f"You used a Healing Potion and healed {heal_amount} HP!")
-        else:
+        if self.healing_potions <= 0:
             print("You have no Healing Potions")
+            return
+
+        if self.hit_points >= 100:
+            print("Your health is already full!")
+            return
+
+        else:
+            heal_amount = random.randint(15, 25)
+            actual_heal = self.heal(heal_amount)
+            self.healing_potions -= 1
+            print(f"You used a Healing Potion and healed {actual_heal} HP!")
 
     def use_vision_potion(self, neighbors):
         """ Uses the adventurer's vision potion
@@ -100,11 +109,9 @@ class Adventurer:
             print("\nVision Potion used! You see:\n")
 
             for direction, room in neighbors.items():
-                print(f"--- {direction} ---")
-                if room:
+                if room:   # only print if the room exists
+                    print(f"--- {direction} ---")
                     print(room)
-                else:
-                    print("### WALL ###")
 
         else:
             print("You have no Vision Potions")
