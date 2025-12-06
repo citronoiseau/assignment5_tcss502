@@ -25,6 +25,7 @@ class DungeonAdventure:
         print("M - Move")
         print("H - Use a healing potion")
         print("V - Use a vision potion")
+        print("EXIT - End the game")
         print("CHEAT - Show the entire dungeon")
 
     def handle_movement(self):
@@ -48,7 +49,7 @@ class DungeonAdventure:
         """ Starts the game
         """
         print("Game started")
-        print("Tour goal is to find all 4 pillars of OOP and Exit to win the game")
+        print("Your goal is to find all 4 pillars of OOP and Exit to win the game")
 
         # process the room
         self._dungeon.process_room()  # collect potions/pillars etc
@@ -77,6 +78,9 @@ class DungeonAdventure:
                 )
             elif choice == "CHEAT":
                 print(self._dungeon)
+            elif choice== "EXIT":
+                print("You ended the game.")
+                break
             else:
                 print("Invalid Option")
 
