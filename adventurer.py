@@ -20,6 +20,7 @@ class Adventurer:
         self.healing_potions = 0
         self.vision_potions = 0
         self.pillars_found = []
+        self.last_event = ""
    
     def __str__(self):
         """A string that displays the characteristics of the adventurer
@@ -88,33 +89,54 @@ class Adventurer:
         """ Uses the adventurer's healing potion
         """
         if self.healing_potions <= 0:
-            print("You have no Healing Potions")
-            return
+            self.last_event = "You have no Healing Potions."
+            return self.last_event
 
         if self.hit_points >= 100:
-            print("Your health is already full!")
-            return
+            self.last_event = "Your health is already full."
+            return self.last_event
 
-        else:
-            heal_amount = random.randint(15, 25)
-            actual_heal = self.heal(heal_amount)
-            self.healing_potions -= 1
-            print(f"You used a Healing Potion and healed {actual_heal} HP!")
+        heal_amount = random.randint(15, 25)
+        actual_heal = self.heal(heal_amount)
+        self.healing_potions -= 1
+
+        self.last_event = f"You used a Healing Potion and healed {actual_heal} HP!"
+        return self.last_event
 
     def use_vision_potion(self, neighbors):
-        """ Uses the adventurer's vision potion
-        """
-        if self.vision_potions > 0:
-            self.vision_potions -= 1
-            print("\nVision Potion used! You see:\n")
+        if self.vision_potions <= 0:
+            self.last_event = "You have no Vision Potions."
+            return self.last_event
 
-            for direction, room in neighbors.items():
-                if room:   # only print if the room exists
-                    print(f"--- {direction} ---")
-                    print(room)
+        self.vision_potions -= 1
 
-        else:
-            print("You have no Vision Potions")
+        lines = ["Vision Potion used! You see:"]
+
+        for direction, room in neighbors.items():
+            if not room:
+                continue
+
+            description = [room.get_type()]
+
+            # pillar
+            if hasattr(room, "get_pillar") and room.get_pillar():
+                description.append(f"Pillar: {room.get_pillar().title()}")
+
+            # pit
+            if hasattr(room, "get_pit") and room.get_pit():
+                description.append("Pit!")
+
+            # items
+            if hasattr(room, "get_items"):
+                items = room.get_items()
+                if items:
+                    item_names = ", ".join(item.get_name() for item in items)
+                    description.append(f"Items: {item_names}")
+
+            lines.append(f"{direction}: " + " | ".join(description))
+
+        self.last_event = "\n".join(lines)
+        return self.last_event
 
     def add_pillar(self, pillar):
         """ Adds a pillar to the adventurer's inventory

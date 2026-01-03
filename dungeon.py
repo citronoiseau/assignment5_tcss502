@@ -200,51 +200,38 @@ class Dungeon:
         Args:
             direction (str): 'N' or 'S' or 'E' or 'W'.
         """
-        if self._current_room.has_door(direction):
-            next_room = self._current_room.get_neighbors()[direction]
-            if next_room:
-                self._current_room = next_room
-                self.process_room()
-            else:
-                print("Cannot move in that direction, wall is blocking!")
-        else:
-            print("No door in that direction!")
+        next_room = self._current_room.get_neighbors()[direction]
+        if next_room:
+            self._current_room = next_room
+            return self._current_room
+        return []
 
     def process_room(self):
-        """
-        Handles adventurer entering the room.
-        """
+        messages = []
         room = self._current_room
 
-        print("\nYou entered a new room!")
-        print(room)
-        # pick up items in normal rooms (not entrance or exit)
         if room.get_type() == "Room":
-            items = room.pick_items()  # clears the room
+            items = room.pick_items()
             for item in items:
-                item_type = item.get_type()
-
-                if item_type == "healing_potion":
+                if item.get_type() == "healing_potion":
                     self._adventurer.add_healing_potion()
-                    print("You found a Healing Potion!")
+                    messages.append("You found a Healing Potion!")
 
-                elif item_type == "vision_potion":
-                    self._adventurer.add_vision_potion()
-                    print("You found a Vision Potion!")
             pit = room.get_pit()
             if pit:
                 damage = pit.get_damage()
                 self._adventurer.take_damage(damage)
-                print(f"You fell into a PIT! Took {damage} damage!")
+                messages.append(f"You fell into a pit and took {damage} damage!")
 
-        # pillar handling
         if room.get_type() == "Room" and room.get_pillar():
             pillar = room.pick_pillar()
             if pillar:
                 self._adventurer.add_pillar(pillar)
-                print(f"You obtained the pillar of {pillar}!")
+                messages.append(f"You obtained the pillar of {pillar}!")
 
-    # show the entire dungeon
+        return messages
+
+  # show the entire dungeon
     def __str__(self):
         """
         Returns a string representation of the entire dungeon map
@@ -278,3 +265,6 @@ class Dungeon:
             output_lines.append("")
 
         return "\n".join(output_lines)
+
+    def get_dungeon_grid(self):
+        return self._rooms

@@ -158,6 +158,8 @@ class Room(RoomConstructor):
         self._items = []
         self._pit = None
         self._pillar = None
+        self._original_items = []
+        self._original_pit = None
 
     def assign_pillar(self, pillar):
         """
